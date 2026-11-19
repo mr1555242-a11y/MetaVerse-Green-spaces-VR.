@@ -1,5 +1,5 @@
 
-using System;
+    using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,18 +19,43 @@ namespace MetaVerseGreenSpacesVR
         public float annualCarbonKg;   // Estimated annual CO2 absorption
     }
 
+    [Serializable]
+    private class GeminiResponse
+    {
+        public GeminiCandidate[] candidates;
+    }
+
+    [Serializable]
+    private class GeminiCandidate
+    {
+        public GeminiContent content;
+    }
+
+    [Serializable]
+    private class GeminiContent
+    {
+        public GeminiPart[] parts;
+    }
+
+    [Serializable]
+    private class GeminiPart
+    {
+        public string text;
+    }
+
     public class GreenSpaceManager : MonoBehaviour
     {
         [Header("Biome & Ecosystem Configuration")]
         public string biomeName = "Emerald Canopy Sector";
         public int initialTreeCount = 50;
-        public float soilMoisture = 60f;          // 0% to 100%
-        public float ambientTemperatureC = 24f;   // Celsius
+        [Range(0f, 100f)] public float soilMoisture = 60f;
+        public float ambientTemperatureC = 24f;
         public BiomeWeather currentWeather = BiomeWeather.Clear;
 
         [Header("AI Companion Settings")]
+        [Tooltip("Leave empty for offline ecological guidance.")]
         [SerializeField] private string geminiApiKey = "";
-        private const string GeminiEndpoint =
+        private const string GeminiModelUrl =
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
         private readonly List<PlantedTreeRecord> activeTrees = new List<PlantedTreeRecord>();
@@ -42,13 +67,13 @@ namespace MetaVerseGreenSpacesVR
             InitializeVirtualBiome();
         }
 
-        // 1. Immersion & Biome Initialization
         public void InitializeVirtualBiome()
         {
             isSimulationActive = true;
             activeTrees.Clear();
+            int safeCount = Mathf.Max(0, initialTreeCount);
 
-            for (int i = 0; i < initialTreeCount; i++)
+            for (int i = 0; i < safeCount; i++)
             {
                 activeTrees.Add(new PlantedTreeRecord
                 {
@@ -63,25 +88,25 @@ namespace MetaVerseGreenSpacesVR
             Debug.Log($"[MetaVerse VR] Biome '{biomeName}' initialized with {activeTrees.Count} trees.");
         }
 
-        // 2. Interactive Reforestation & Cultivation
         public void PlantTree(string speciesName = "Native Rainforest Tree", float initialGrowth = 0.25f)
         {
             if (!isSimulationActive) InitializeVirtualBiome();
 
+            float clampedGrowth = Mathf.Clamp01(initialGrowth);
             float moistureBonus = Mathf.Clamp01(soilMoisture / 70f);
             float initialHealth = Mathf.Clamp(65f + (moistureBonus * 35f), 20f, 100f);
 
             PlantedTreeRecord newTree = new PlantedTreeRecord
             {
-                speciesName = speciesName,
-                growthStage = Mathf.Clamp01(initialGrowth),
+                speciesName = string.IsNullOrWhiteSpace(speciesName) ? "Native Rainforest Tree" : speciesName,
+                growthStage = clampedGrowth,
                 healthScore = initialHealth,
-                annualCarbonKg = BaseCarbonPerMatureTreeKg * Mathf.Clamp01(initialGrowth)
+                annualCarbonKg = BaseCarbonPerMatureTreeKg * clampedGrowth * (initialHealth / 100f)
             };
 
             activeTrees.Add(newTree);
             RecalculateCarbonImpact();
-            Debug.Log($"[Reforestation] Planted '{speciesName}'. Total trees: {activeTrees.Count}");
+            Debug.Log($"[Reforestation] Planted '{newTree.speciesName}'. Total trees: {activeTrees.Count}");
         }
 
         public void NurtureEcosystem(float waterAdded = 15f, float growthBoost = 0.1f)
@@ -99,7 +124,6 @@ namespace MetaVerseGreenSpacesVR
             Debug.Log($"[Cultivation] Soil moisture now {soilMoisture:F1}%. Flora updated.");
         }
 
-        // 3. Real-Time Climate & Weather Simulation
         public void UpdateWeatherState(BiomeWeather newWeather)
         {
             currentWeather = newWeather;
@@ -145,7 +169,6 @@ namespace MetaVerseGreenSpacesVR
             }
         }
 
-        // 4. Impact Bridging & Carbon Analytics
         public float RecalculateCarbonImpact()
         {
             float totalCarbon = 0f;
@@ -158,7 +181,6 @@ namespace MetaVerseGreenSpacesVR
             return totalCarbon;
         }
 
-        // 5. AI Ecological Companion (Live Gemini API if key is set, otherwise contextual ecological guidance)
         public async Task<string> QueryAICompanion(string ecologicalQuery)
         {
             float totalCarbon = RecalculateCarbonImpact();
@@ -177,31 +199,61 @@ namespace MetaVerseGreenSpacesVR
             string prompt = $"Act as an ecological mentor for MetaVerse GreenSpaces VR. Context: {statusContext}. Query: {ecologicalQuery}";
             string jsonBody = "{\"contents\":[{\"parts\":[{\"text\":\"" + EscapeJson(prompt) + "\"}]}]}";
 
-            using (UnityWebRequest request = new UnityWebRequest(GeminiEndpoint + "?key=" + geminiApiKey, "POST"))
+            using (UnityWebRequest request = new UnityWebRequest(GeminiModelUrl, "POST"))
             {
                 byte[] payload = Encoding.UTF8.GetBytes(jsonBody);
                 request.uploadHandler = new UploadHandlerRaw(payload);
                 request.downloadHandler = new DownloadHandlerBuffer();
                 request.SetRequestHeader("Content-Type", "application/json");
+                request.SetRequestHeader("x-goog-api-key", geminiApiKey.Trim());
 
                 var op = request.SendWebRequest();
                 while (!op.isDone)
                 {
+                    if (this == null) return string.Empty;
                     await Task.Yield();
                 }
 
+                if (this == null) return string.Empty;
+
                 if (request.result == UnityWebRequest.Result.Success)
                 {
-                    return request.downloadHandler.text;
+                    string parsed = ExtractTextFromGeminiJson(request.downloadHandler.text);
+                    return string.IsNullOrWhiteSpace(parsed) ? request.downloadHandler.text : parsed;
                 }
 
                 return $"[AI Companion Fallback] {statusContext} Could not reach live API ({request.error}); local guidance active.";
             }
         }
 
+        private string ExtractTextFromGeminiJson(string rawJson)
+        {
+            if (string.IsNullOrWhiteSpace(rawJson)) return string.Empty;
+            try
+            {
+                GeminiResponse response = JsonUtility.FromJson<GeminiResponse>(rawJson);
+                if (response?.candidates != null && response.candidates.Length > 0)
+                {
+                    var parts = response.candidates[0].content?.parts;
+                    if (parts != null && parts.Length > 0)
+                    {
+                        return parts[0].text;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[AI Companion] JSON parse warning: {ex.Message}");
+            }
+            return string.Empty;
+        }
+
         private string EscapeJson(string input)
         {
-            return input.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", " ");
+            if (string.IsNullOrEmpty(input)) return string.Empty;
+            return input.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", " ").Replace("\n", " ");
         }
     }
 }
+
+
