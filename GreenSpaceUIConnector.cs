@@ -77,4 +77,11 @@ namespace MetaVerseGreenSpacesVR
     }
 }
 
-
+*GreenSpaceUIConnector.cs (UI Connector)
+​To display ecological status, feedback, and AI mentor responses in the user interface:
+​UI References:
+​Assign UI text elements (such as TextMeshProUGUI or Text), input fields, buttons, and panels in the Inspector.
+​Scene & Event Setup:
+​Include a Canvas and an EventSystem in the scene, and connect UI action/update methods to the corresponding buttons or state callbacks.
+​Project Settings:
+​Configure the Canvas render mode (such as World Space for VR) and XR UI Input Module so interactions work smoothly.*
