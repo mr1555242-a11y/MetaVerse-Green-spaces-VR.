@@ -61,5 +61,12 @@ namespace MetaVerseGreenSpacesVR
         }
     }
 }
-
+*GreenSpace3DFloraVisualizer.cs (3D Flora Visualizer)
+​To visualize plant growth and environmental states in 3D:
+​Scene & Prefab References:
+​Assign 3D flora prefabs/models, target GameObjects or Transforms, and Renderer/material references in the Inspector.
+​Event & Simulation Hooks:
+​Connect growth, cultivation, or weather state updates so visual changes (such as scale, stage, or material appearance) update dynamically.
+​Project Settings:
+​Ensure proper scene lighting, compatible materials/shaders, and clean object transforms in the Unity scene.
 
