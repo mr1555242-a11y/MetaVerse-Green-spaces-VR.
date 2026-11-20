@@ -50,4 +50,9 @@ namespace MetaVerseGreenSpacesVR
     }
 }
 
-
+*EcologicalReportUploader.cs (Ecological Report Uploader)
+​To serialize session reports and handle cloud/server synchronization:
+​Data & Network Setup:
+​Provide the ecological report data structure/fields compatible with serialization (such as JsonUtility) and connect real API endpoint/request logic where cloud upload is implemented.
+​Event & Project Settings:
+​Trigger the upload method from session completion or UI/report events, and ensure Internet Access is enabled in Player Settings along with required namespaces (System, UnityEngine, etc.).
