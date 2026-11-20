@@ -72,5 +72,18 @@ namespace MetaVerseGreenSpacesVR
         }
     }
 }
-
+*GreenSpaceVRInputBridge.cs (VR Input Bridge)
+​To make this script work seamlessly in Unity, the following dependencies, events, and settings should be configured:
+​Required Classes & Enum (in MetaVerseGreenSpacesVR namespace):
+​BiomeWeatherState enum with values: Clear, Rain, Drought, and SeasonalRecovery.
+​GreenSpaceManager (MonoBehaviour) containing:
+​public void PlantSpecimen(string species, bool nitrogenFixing, float initialGrowth)
+​public void ApplyCultivationAction(float waterDelta, float nutrientDelta, float sunlightDelta)
+​public void SetWeatherState(BiomeWeatherState state)
+​public async Task<string> AskEcologicalMentor(string prompt) (using System.Threading.Tasks)
+​Scene Setup: Place an active GreenSpaceManager GameObject in the scene and a GameObject with GreenSpaceVRInputBridge attached, assigning the manager reference in the Inspector.
+​Event Bindings:
+​Bind TriggerPlantTree(), TriggerPlantAcacia(), TriggerCultivate(), TriggerWeatherRain(), TriggerWeatherDrought(), TriggerWeatherClear(), TriggerWeatherRecovery(), and TriggerAskMentor(string) to VR UI Button On Click () events, or to XRSimpleInteractable (Select Entered) / InputActionReference (Performed) events.
+​Project Settings:
+​Use a Unity version supporting FindFirstObjectByType (Unity 2023.1+ / Unity 6), include an EventSystem with XR UI Input Module for VR UI clicks, and enable Internet Access plus proper AI API/service setup for AskEcologicalMentor*
 
