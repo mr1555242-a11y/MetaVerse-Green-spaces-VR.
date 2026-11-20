@@ -74,3 +74,23 @@ MetaVerse-GreenSpaces-VR/
 
 ### Why This Approach Scales
 Large teams and multi-year initiatives often struggle when features grow into monolithic scripts. By structuring core interactions around clear events, modular scripts, and verifiable workflows from the start, this project establishes a clean base that can be extended with richer 3D environments, XR interactions, and real-world ecological datasets over time.
+## System Architecture & Data Flow
+
+**MetaVerse GreenSpaces VR** follows a modular, event-driven structure in Unity so simulation state, spatial visuals, user interactions, and reporting remain decoupled and maintainable:
+
+- **Simulation & AI Core (`GreenSpaceManager`):** Tracks biome parameters, flora records, weather states, carbon offset estimates, and ecological guidance via Gemini with local fallback support.
+- **Spatial & Visual Layer (`GreenSpace3DFloraVisualizer` & visual modules):** Translates growth stage, health, and environmental stress into 3D scale and color feedback using `MaterialPropertyBlock` to avoid unnecessary material duplication.
+- **Interaction & UI Bridge (`GreenSpaceVRInputBridge` & `GreenSpaceUIConnector`):** Connects VR/UI triggers to simulation actions and formats live status and mentor responses for display.
+- **Reporting & Serialization (`EcologicalReportUploader`):** Serializes structured ecological reports for external sync or logging while isolating serialization errors.
+
+## Reliability, Assumptions & Current Scope
+
+- **Graceful Degradation:** When external AI requests fail or no API key is configured, the system falls back to rule-based local ecological guidance rather than interrupting the user experience.
+- **Model Assumptions:** Carbon offset figures represent simulated annual estimates derived from flora growth, health, and environmental conditions for interactive learning and planning—not certified environmental audits.
+- **Integration Alignment:** Keep class, event, and method signatures consistent across scene scripts so Unity Inspector bindings and event listeners connect without compile or runtime warnings.
+
+## Verification & Roadmap
+
+1. **Scene Setup:** Place the core manager, UI/VR connectors, and visual components in a Unity scene and assign Inspector references.
+2. **State & Event Testing:** Trigger planting, cultivation, weather shifts, and mentor queries to verify state updates, visual changes, and report output.
+3. **Next Steps:** Expand interactive VR biome tooling, enrich species-specific ecological parameters, and connect persistent cloud endpoints for multi-session tracking.
