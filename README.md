@@ -114,3 +114,39 @@ Large teams and multi-year initiatives often struggle when features grow into mo
 - **Phase 1 — Core Simulation & VR Prototype:** Establish biome state management, 3D flora scaling/visual feedback, UI/VR bridges, and AI mentor integration.
 - **Phase 2 — Cloud Sync & Multi-User Sessions:** Add persistent cloud storage, shared biome sessions, and richer ecological datasets.
 - **Phase 3 — Field-Informed Expansion & Ecosystem Maturity:** Refine simulation parameters using real-world ecological references, user testing insights, and broader XR hardware optimization.
+## System Architecture & Data Flow
+
+**MetaVerse GreenSpaces VR** utilizes a decoupled, modular architecture ensuring simulation logic, spatial visualization, and user interfaces operate independently.
+
+```text
+[ Gemini API / Offline Fallback ]
+              │
+              ▼
+    ┌───────────────────┐
+    | GreenSpaceManager | <─── Nurture / Weather / Plant
+    └─────────┬─────────┘
+              │
+     UnityEvents / Data
+              │
+      ┌───────┴───────┐
+      │               │
+      ▼               ▼
+┌───────────┐   ┌──────────────────────────┐
+| UIConnect |   | GreenSpace3DFloraVisualizer |
+└─────┬─────┘   └─────────────┬────────────┘
+      │                       │
+      ▼                       ▼
+[ VR Dashboard ]        [ 3D Flora Objects ]
+Simulation Core (GreenSpaceManager): Acts as the central state engine, managing biome parameters, flora registries, and environmental conditions.
+​Visual Representation (GreenSpace3DFloraVisualizer): Listens to state changes to manipulate 3D object scales and shader properties dynamically.
+​Interface Layer (UIConnector): Bridges simulation data to HUD elements and processes spatial input commands।         Resilience and Fault Tolerance
+​To guarantee uninterrupted operation in live environments, the system implements graceful degradation. When external AI connectivity fails or API keys are omitted, the ecosystem automatically pivots to deterministic local fallback logic. This ensures users receive valid ecological guidance and maintain simulation continuity without encountering runtime exceptions.                     Performance-Driven Visuals
+Rendering dense virtual forests requires strict optimization to maintain the high frame rates necessary for preventing VR motion sickness. Instead of instantiating unique material instances for every tree—which would severely inflate draw calls—the system employs MaterialPropertyBlock. This technique enables dynamic modulation of individual tree colors, health states, and drought stress indicators using a single shared shader pass, preserving visual fidelity while strictly binding rendering overhead.                      Roadmap to Scale
+​The architectural blueprint is structured to transition seamlessly from a single-user prototype to an enterprise-grade ecosystem:
+​Phase 1 — Core Simulation & VR Prototype: Establish robust biome state management, 3D flora scaling, and AI mentor integration.
+​Phase 2 — Cloud Persistence & Analytics: Implement structured JSON serialization to stream telemetry data to cloud databases, enabling longitudinal environmental tracking and global leaderboards.
+​Phase 3 — Multi-User Collaborative Biomes: Decouple local input handling from simulation execution, integrating networking protocols to allow multiple participants to interact within synchronized, persistent green spaces. to Scale
+​The architectural blueprint is structured to transition seamlessly from a single-user prototype to an enterprise-grade ecosystem:
+​Phase 1 — Core Simulation & VR Prototype: Establish robust biome state management, 3D flora scaling, and AI mentor integration.
+​Phase 2 — Cloud Persistence & Analytics: Implement structured JSON serialization to stream telemetry data to cloud databases, enabling longitudinal environmental tracking and global leaderboards.
+​Phase 3 — Multi-User Collaborative Biomes: Decouple local input handling from simulation execution, integrating networking protocols to allow multiple participants to interact within synchronized, persistent green spaces.
