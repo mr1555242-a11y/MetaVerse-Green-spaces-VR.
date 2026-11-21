@@ -150,3 +150,26 @@ Rendering dense virtual forests requires strict optimization to maintain the hig
 ​Phase 1 — Core Simulation & VR Prototype: Establish robust biome state management, 3D flora scaling, and AI mentor integration.
 ​Phase 2 — Cloud Persistence & Analytics: Implement structured JSON serialization to stream telemetry data to cloud databases, enabling longitudinal environmental tracking and global leaderboards.
 ​Phase 3 — Multi-User Collaborative Biomes: Decouple local input handling from simulation execution, integrating networking protocols to allow multiple participants to interact within synchronized, persistent green spaces.
+# MetaVerse GreenSpaces VR: Spatial Computing & AI Companions for Immersive Environmental Learning
+
+## 💡 Inspiration & Ecological Vision
+Rapid urbanization and screen-based passive learning often create a disconnect between people and the natural world. Traditional environmental education—relying heavily on static textbooks and 2D videos—rarely builds hands-on ecological intuition. **MetaVerse GreenSpaces VR** was designed to bridge that gap by turning environmental science into an interactive spatial experience where learners actively plant, nurture, and manage virtual micro-ecosystems.
+
+## 🛠️ Core Functionality & Real-World Impact
+- **Interactive Reforestation & Cultivation:** Users plant native rainforest trees and nitrogen-fixing species (such as Acacia), adjusting water, soil nutrients, and sunlight to observe real-time growth and vitality responses.
+- **Dynamic Climate Simulation Engine:** Instantly simulate changing environmental conditions—`Clear`, `Rain`, `Drought`, and `SeasonalRecovery`—to witness how moisture and ambient temperature directly impact plant health and carbon capture.
+- **Live Carbon Offset Telemetry:** Calculates estimated annual $\text{CO}_2$ absorption ($\text{kg CO}_2/\text{year}$) dynamically based on species type, growth stage, vitality score, and thermal stress.
+- **Hybrid AI Ecological Mentor:** Integrates the **Gemini API** to deliver context-aware ecological advice based on live biome telemetry, paired with a deterministic **offline fallback engine** so core simulation and guidance remain uninterrupted even without internet access or an API key.
+
+## ⚙️ Modular System Architecture (Unity C#)
+Engineered in **Unity (C#)** using a clean, decoupled, event-driven architecture under the `MetaVerseGreenSpacesVR` namespace:
+- **`GreenSpaceManager`:** Core simulation state engine managing biome weather, soil moisture, temperature, flora records, carbon calculations, and Gemini AI / local fallback responses.
+- **`GreenSpace3DFloraVisualizer`:** Uses `MaterialPropertyBlock` to dynamically scale 3D flora and blend health/drought color gradients without duplicating materials or inflating draw calls.
+- **`GreenSpaceVRInputBridge`:** Connects VR controller/UI triggers (planting, cultivating, weather shifts, mentor queries) to simulation actions.
+- **`GreenSpaceUIConnector`:** Formats live ecological telemetry and AI mentor replies for World-Space VR dashboards (`Text` / `TextMeshPro` hooks).
+- **`EcologicalReportUploader` & `GreenSpaceExpansionModule`:** Serializes structured biome snapshots into JSON payloads for optional cloud synchronization, particle weather effects, and environmental lighting updates.
+
+## 🚀 Future Scalability Roadmap
+- **Phase 1 — Standalone Core & Offline Resilience:** Modular biome state engine, `MaterialPropertyBlock` rendering optimization, VR input/UI bridges, and hybrid Gemini/local ecological mentorship.
+- **Phase 2 — Cloud Telemetry & Classroom Analytics:** Connect JSON report serialization to cloud endpoints for longitudinal student progress tracking and multi-session environmental analytics.
+- **Phase 3 — Collaborative Multi-User Biomes:** Extend the decoupled event bridge to support shared virtual reforestation spaces for schools, NGOs, and environmental workshops.
