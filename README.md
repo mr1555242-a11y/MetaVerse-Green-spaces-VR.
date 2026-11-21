@@ -456,3 +456,5 @@ Looking beyond the current build, **MetaVerse GreenSpaces VR** has the potential
 * **Expanded Shared and Multi-User Spaces:** Future iterations can explore multi-user or shared virtual environments, allowing people in different locations to experience calm, collaborative, or community green spaces together.
 * **Adaptive and Context-Aware Environments:** Over time, the system can explore adapting lighting, ambient soundscapes, and environmental cues based on user context, preferences, or wellness feedback to create more personalized restorative spaces.
 * **Broader Impact Across Daily Life, Learning, and Well-Being:** By combining spatial computing with nature-inspired design, projects in this direction can play a meaningful role in supporting mental relaxation, focused study or work environments, creative exploration, and accessible calm spaces for people living in dense urban areas or spending long hours indoors—provided every future feature is built and verified step by step with real code, testing, and transparent documentation.
+## Detailed Documentation
+* [Code Overview (`CODE_OVERVIEW.md`)](CODE_OVERVIEW.md)
