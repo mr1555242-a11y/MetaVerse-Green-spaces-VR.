@@ -1,14 +1,20 @@
-
-    using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Networking;
 
 namespace MetaVerseGreenSpacesVR
 {
-    public enum BiomeWeather { Clear, Rain, Drought, SeasonalRecovery }
+    public enum BiomeWeather
+    {
+        Clear,
+        Rain,
+        Drought,
+        SeasonalRecovery
+    }
 
     [Serializable]
     public class PlantedTreeRecord
@@ -20,25 +26,43 @@ namespace MetaVerseGreenSpacesVR
     }
 
     [Serializable]
-    private class GeminiResponse
+    public class GeminiResponse
     {
         public GeminiCandidate[] candidates;
     }
 
     [Serializable]
-    private class GeminiCandidate
+    public class GeminiCandidate
     {
         public GeminiContent content;
     }
 
     [Serializable]
-    private class GeminiContent
+    public class GeminiContent
     {
         public GeminiPart[] parts;
     }
 
     [Serializable]
-    private class GeminiPart
+    public class GeminiPart
+    {
+        public string text;
+    }
+
+    [Serializable]
+    public class GeminiRequestPayload
+    {
+        public GeminiRequestContent[] contents;
+    }
+
+    [Serializable]
+    public class GeminiRequestContent
+    {
+        public GeminiRequestPart[] parts;
+    }
+
+    [Serializable]
+    public class GeminiRequestPart
     {
         public string text;
     }
@@ -61,6 +85,8 @@ namespace MetaVerseGreenSpacesVR
         private readonly List<PlantedTreeRecord> activeTrees = new List<PlantedTreeRecord>();
         private bool isSimulationActive = false;
         private const float BaseCarbonPerMatureTreeKg = 21.5f;
+
+        public int ActiveTreeCount => activeTrees.Count;
 
         private void Start()
         {
@@ -90,7 +116,10 @@ namespace MetaVerseGreenSpacesVR
 
         public void PlantTree(string speciesName = "Native Rainforest Tree", float initialGrowth = 0.25f)
         {
-            if (!isSimulationActive) InitializeVirtualBiome();
+            if (!isSimulationActive)
+            {
+                InitializeVirtualBiome();
+            }
 
             float clampedGrowth = Mathf.Clamp01(initialGrowth);
             float moistureBonus = Mathf.Clamp01(soilMoisture / 70f);
@@ -113,7 +142,7 @@ namespace MetaVerseGreenSpacesVR
         {
             soilMoisture = Mathf.Clamp(soilMoisture + waterAdded, 0f, 100f);
 
-            foreach (var tree in activeTrees)
+            foreach (PlantedTreeRecord tree in activeTrees)
             {
                 tree.healthScore = Mathf.Clamp(tree.healthScore + (waterAdded * 0.3f), 0f, 100f);
                 tree.growthStage = Mathf.Clamp01(tree.growthStage + growthBoost);
@@ -161,7 +190,7 @@ namespace MetaVerseGreenSpacesVR
 
         private void AdjustFloraForWeather(float healthDelta, float growthDelta)
         {
-            foreach (var tree in activeTrees)
+            foreach (PlantedTreeRecord tree in activeTrees)
             {
                 tree.healthScore = Mathf.Clamp(tree.healthScore + healthDelta, 0f, 100f);
                 tree.growthStage = Mathf.Clamp01(tree.growthStage + growthDelta);
@@ -172,7 +201,7 @@ namespace MetaVerseGreenSpacesVR
         public float RecalculateCarbonImpact()
         {
             float totalCarbon = 0f;
-            foreach (var tree in activeTrees)
+            foreach (PlantedTreeRecord tree in activeTrees)
             {
                 totalCarbon += tree.annualCarbonKg;
             }
@@ -197,7 +226,7 @@ namespace MetaVerseGreenSpacesVR
             }
 
             string prompt = $"Act as an ecological mentor for MetaVerse GreenSpaces VR. Context: {statusContext}. Query: {ecologicalQuery}";
-            string jsonBody = "{\"contents\":[{\"parts\":[{\"text\":\"" + EscapeJson(prompt) + "\"}]}]}";
+            string jsonBody = BuildSafeGeminiJson(prompt);
 
             using (UnityWebRequest request = new UnityWebRequest(GeminiModelUrl, "POST"))
             {
@@ -207,14 +236,20 @@ namespace MetaVerseGreenSpacesVR
                 request.SetRequestHeader("Content-Type", "application/json");
                 request.SetRequestHeader("x-goog-api-key", geminiApiKey.Trim());
 
-                var op = request.SendWebRequest();
+                UnityWebRequestAsyncOperation op = request.SendWebRequest();
                 while (!op.isDone)
                 {
-                    if (this == null) return string.Empty;
+                    if (this == null)
+                    {
+                        return string.Empty;
+                    }
                     await Task.Yield();
                 }
 
-                if (this == null) return string.Empty;
+                if (this == null)
+                {
+                    return string.Empty;
+                }
 
                 if (request.result == UnityWebRequest.Result.Success)
                 {
@@ -226,15 +261,34 @@ namespace MetaVerseGreenSpacesVR
             }
         }
 
+        public string BuildSafeGeminiJson(string promptText)
+        {
+            GeminiRequestPayload payload = new GeminiRequestPayload
+            {
+                contents = new[]
+                {
+                    new GeminiRequestContent
+                    {
+                        parts = new[] { new GeminiRequestPart { text = promptText } }
+                    }
+                }
+            };
+            return JsonUtility.ToJson(payload);
+        }
+
         private string ExtractTextFromGeminiJson(string rawJson)
         {
-            if (string.IsNullOrWhiteSpace(rawJson)) return string.Empty;
+            if (string.IsNullOrWhiteSpace(rawJson))
+            {
+                return string.Empty;
+            }
+
             try
             {
                 GeminiResponse response = JsonUtility.FromJson<GeminiResponse>(rawJson);
                 if (response?.candidates != null && response.candidates.Length > 0)
                 {
-                    var parts = response.candidates[0].content?.parts;
+                    GeminiPart[] parts = response.candidates[0].content?.parts;
                     if (parts != null && parts.Length > 0)
                     {
                         return parts[0].text;
@@ -245,111 +299,87 @@ namespace MetaVerseGreenSpacesVR
             {
                 Debug.LogWarning($"[AI Companion] JSON parse warning: {ex.Message}");
             }
+
             return string.Empty;
         }
-
-        private string EscapeJson(string input)
-        {
-            if (string.IsNullOrEmpty(input)) return string.Empty;
-            return input.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", " ").Replace("\n", " ");
-        }
-    }
-}
-
-[Serializable]
-public class GeminiRequestPayload
-{
-    public GeminiRequestContent[] contents;
-}
-
-[Serializable]
-public class GeminiRequestContent
-{
-    public GeminiRequestPart[] parts;
-}
-
-[Serializable]
-public class GeminiRequestPart
-{
-    public string text;
-}
-
-public class GreenSpaceExpansionModule : MonoBehaviour
-{
-    [Header("VR Visuals & Weather Effects")]
-    public GameObject treePrefab;
-    public Transform forestRoot;
-    public float spawnRadius = 25f;
-    public ParticleSystem rainEffect;
-    public ParticleSystem droughtDustEffect;
-    public Light directionalSunLight;
-
-    [Header("VR Dashboard Events")]
-    public UnityEvent<float, int> onCarbonStatsUpdated;
-    public UnityEvent<BiomeWeather> onWeatherChanged;
-
-    public float CalculateSpeciesCarbon(string speciesName, float growthStage, float healthScore, float ambientTempC)
-    {
-        float baseRateKg = (!string.IsNullOrEmpty(speciesName) && speciesName.Contains("Acacia")) ? 18.2f : 22.8f;
-        float tempStressFactor = (ambientTempC > 34f || ambientTempC < 10f) ? 0.75f : 1.0f;
-        return baseRateKg * Mathf.Clamp01(growthStage) * (Mathf.Clamp(healthScore, 0f, 100f) / 100f) * tempStressFactor;
     }
 
-    public GameObject SpawnTreeVisual(float growthStage)
+    public class GreenSpaceExpansionModule : MonoBehaviour
     {
-        if (treePrefab == null) return null;
+        [Header("VR Visuals & Weather Effects")]
+        public GameObject treePrefab;
+        public Transform forestRoot;
+        public float spawnRadius = 25f;
+        public ParticleSystem rainEffect;
+        public ParticleSystem droughtDustEffect;
+        public Light directionalSunLight;
 
-        Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * spawnRadius;
-        Vector3 spawnPos = (forestRoot != null ? forestRoot.position : transform.position) +
-                           new Vector3(randomCircle.x, 0f, randomCircle.y);
+        [Header("VR Dashboard Events")]
+        public UnityEvent<float, int> onCarbonStatsUpdated;
+        public UnityEvent<BiomeWeather> onWeatherChanged;
 
-        GameObject instance = Instantiate(
-            treePrefab,
-            spawnPos,
-            Quaternion.Euler(0f, UnityEngine.Random.Range(0f, 360f), 0f),
-            forestRoot
-        );
-        instance.transform.localScale = Vector3.one * Mathf.Lerp(0.35f, 1.35f, Mathf.Clamp01(growthStage));
-        return instance;
-    }
-
-    public void ApplyWeatherAndCarbonVisuals(BiomeWeather weather, float totalCarbonKg, int treeCount)
-    {
-        if (rainEffect != null)
+        public float CalculateSpeciesCarbon(string speciesName, float growthStage, float healthScore, float ambientTempC)
         {
-            if (weather == BiomeWeather.Rain) rainEffect.Play();
-            else rainEffect.Stop();
+            float baseRateKg = (!string.IsNullOrEmpty(speciesName) && speciesName.Contains("Acacia")) ? 18.2f : 22.8f;
+            float tempStressFactor = (ambientTempC > 34f || ambientTempC < 10f) ? 0.75f : 1.0f;
+            return baseRateKg * Mathf.Clamp01(growthStage) * (Mathf.Clamp(healthScore, 0f, 100f) / 100f) * tempStressFactor;
         }
 
-        if (droughtDustEffect != null)
+        public GameObject SpawnTreeVisual(float growthStage)
         {
-            if (weather == BiomeWeather.Drought) droughtDustEffect.Play();
-            else droughtDustEffect.Stop();
-        }
-
-        if (directionalSunLight != null)
-        {
-            directionalSunLight.intensity = weather == BiomeWeather.Rain ? 0.6f :
-                                            weather == BiomeWeather.Drought ? 1.45f : 1.0f;
-        }
-
-        onWeatherChanged?.Invoke(weather);
-        onCarbonStatsUpdated?.Invoke(totalCarbonKg, treeCount);
-    }
-
-    public string BuildSafeGeminiJson(string promptText)
-    {
-        GeminiRequestPayload payload = new GeminiRequestPayload
-        {
-            contents = new[]
+            if (treePrefab == null)
             {
-                new GeminiRequestContent
+                return null;
+            }
+
+            Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * spawnRadius;
+            Vector3 spawnPos = (forestRoot != null ? forestRoot.position : transform.position) +
+                               new Vector3(randomCircle.x, 0f, randomCircle.y);
+
+            GameObject instance = Instantiate(
+                treePrefab,
+                spawnPos,
+                Quaternion.Euler(0f, UnityEngine.Random.Range(0f, 360f), 0f),
+                forestRoot
+            );
+            instance.transform.localScale = Vector3.one * Mathf.Lerp(0.35f, 1.35f, Mathf.Clamp01(growthStage));
+            return instance;
+        }
+
+        public void ApplyWeatherAndCarbonVisuals(BiomeWeather weather, float totalCarbonKg, int treeCount)
+        {
+            if (rainEffect != null)
+            {
+                if (weather == BiomeWeather.Rain)
                 {
-                    parts = new[] { new GeminiRequestPart { text = promptText } }
+                    rainEffect.Play();
+                }
+                else
+                {
+                    rainEffect.Stop();
                 }
             }
-        };
-        return JsonUtility.ToJson(payload);
+
+            if (droughtDustEffect != null)
+            {
+                if (weather == BiomeWeather.Drought)
+                {
+                    droughtDustEffect.Play();
+                }
+                else
+                {
+                    droughtDustEffect.Stop();
+                }
+            }
+
+            if (directionalSunLight != null)
+            {
+                directionalSunLight.intensity = weather == BiomeWeather.Rain ? 0.6f :
+                                                weather == BiomeWeather.Drought ? 1.45f : 1.0f;
+            }
+
+            onWeatherChanged?.Invoke(weather);
+            onCarbonStatsUpdated?.Invoke(totalCarbonKg, treeCount);
+        }
     }
 }
-
