@@ -86,4 +86,19 @@ namespace MetaVerseGreenSpacesVR
 ​Bind TriggerPlantTree(), TriggerPlantAcacia(), TriggerCultivate(), TriggerWeatherRain(), TriggerWeatherDrought(), TriggerWeatherClear(), TriggerWeatherRecovery(), and TriggerAskMentor(string) to VR UI Button On Click () events, or to XRSimpleInteractable (Select Entered) / InputActionReference (Performed) events.
 ​Project Settings:
 ​Use a Unity version supporting FindFirstObjectByType (Unity 2023.1+ / Unity 6), include an EventSystem with XR UI Input Module for VR UI clicks, and enable Internet Access plus proper AI API/service setup for AskEcologicalMentor*
+## Project Summary & Code Alignment
+
+**MetaVerse GreenSpaces VR** is a Unity (C#) spatial simulation prototype focused on interactive reforestation, dynamic weather and soil-moisture states, estimated annual $\text{CO}_2$ offset tracking ($\text{kg CO}_2/\text{year}$), and AI-assisted ecological guidance with a deterministic offline fallback.
+
+### Implemented Modules in the Codebase
+- **`GreenSpaceManager`:** Initializes the virtual biome (`Emerald Canopy Sector`), tracks planted trees (`Native Rainforest Tree` and `Nitrogen-Fixing Acacia`), updates soil moisture, temperature, and weather states (`Clear`, `Rain`, `Drought`, `SeasonalRecovery`), calculates estimated annual carbon absorption, and queries the Gemini API with local fallback guidance when offline or unconfigured.
+- **`GreenSpaceExpansionModule`:** Computes species- and temperature-adjusted carbon estimates, spawns tree prefabs within a configured radius, toggles rain/drought particle effects and directional light intensity, and dispatches `UnityEvent` updates.
+- **`GreenSpaceUnifiedBridge`:** Synchronizes simulation state, resource metrics (`waterLevel`, `soilNutrients`, `sunlightLevel`, `temperatureC`), and `EcologicalReport` snapshots across UI, visual, and reporting components.
+- **`GreenSpaceVRInputBridge` & `GreenSpaceUIConnector`:** Connect planting, cultivation, weather transitions, and mentor queries to Unity events and formatted status/mentor text outputs.
+- **`EcologicalReportUploader`:** Listens for report updates and serializes `EcologicalReport` payloads into JSON for logging or external integration.
+- **Verification Runners (`GreenSpaceSimulationVerification`, `GreenSpaceFinalProofRunner`, `GreenSpaceShowcaseProof`):** Execute runtime checks for baseline values, state/carbon changes, mentor/fallback responses, and module wiring.
+
+### Scope & Future Roadmap
+- **Current Scope:** Core C# ecosystem simulation, carbon estimation, event-driven UI/report wiring, AI/offline mentor logic, and automated runtime verification scripts.
+- **Planned Expansion:** Deeper Unity scene/XR interaction integration, multiplayer sessions, cloud persistence, and biometric/environmental telemetry as each feature is implemented and verified.
 
