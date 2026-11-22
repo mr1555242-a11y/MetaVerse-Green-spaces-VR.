@@ -505,3 +505,10 @@ Looking beyond the current build, **MetaVerse GreenSpaces VR** has the potential
 * **Broader Impact Across Daily Life, Learning, and Well-Being:** By combining spatial computing with nature-inspired design, projects in this direction can play a meaningful role in supporting mental relaxation, focused study or work environments, creative exploration, and accessible calm spaces for people living in dense urban areas or spending long hours indoors—provided every future feature is built and verified step by step with real code, testing, and transparent documentation.
 ## Detailed Documentation
 * [Code Overview (`CODE_OVERVIEW.md`)](CODE_OVERVIEW.md)
+## Quick Verification & How to Run
+
+Evaluators and reviewers can inspect the implementation and verify the documented modules in the repository:
+
+1. **Browse Core & Proof Scripts:** Check the core and verification scripts in the repository—such as `GreenSpaceManager`, `GreenSpaceExpansionModule`, `GreenSpaceUnifiedBridge`, `GreenSpaceVRInputBridge`, `GreenSpaceUIConnector`, `EcologicalReportUploader`, `GreenSpace3DFloraVisualizer`, `GreenSpaceFinalProofRunner`, `GreenSpaceShowcaseProof`, and `GreenSpaceSimulationVerification`.
+2. **Review Architecture & Fallback Logic:** Trace how state management, spatial/LOD and depth-occlusion logic, draw-call optimizations, and Gemini API / offline fallback handling are structured in C#.
+3. **Open in Unity (Optional Local Verification):** If running locally in Unity, open the project with compatible XR packages (`OpenXR` / `Meta XR` as configured in the project) and check the Console for any missing references or environment setup requirements before building to target hardware.
