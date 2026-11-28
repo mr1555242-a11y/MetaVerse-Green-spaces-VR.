@@ -1,8 +1,0 @@
-Project Inspiration & Problem Solved
-The 'MetaVerse GreenSpaces VR' project was born from the urgent need to reconnect urban populations with nature. It addresses the mental and physical fatigue caused by modern sedentary lifestyles by transforming living spaces into immersive, therapeutic natural environments, promoting daily wellness and environmental awareness through mixed reality.
-​Technical Architecture
-Built on the Unity engine, the core architecture leverages C# for robust logic and system integration. It seamlessly incorporates OpenXR and the Meta XR SDK for high-fidelity hand tracking, spatial passthrough, and spatial anchoring, ensuring intuitive, controller-free interaction. Challenges Overcome
-A primary technical hurdle was achieving seamless spatial blending between high-resolution virtual biomes and real-world rooms without visual clipping. I resolved this by implementing dynamic spatial culling and custom shaders that adjust occlusion in real-time, maintaining visual immersion without sacrificing performance.
-​Future Plans & Scalability
-Looking ahead, the project will expand to include a cloud-based multi-user framework, allowing users to share restorative virtual spaces globally. I also plan to integrate adaptive biofeedback systems, tailoring environmental parameters based on real-time stress levels. Demo Overview
-The accompanying video demonstrates core functionalities, highlighting the seamless transition from physical pass-through to the serene virtual biomes. It showcases responsive hand interactions, such as interacting with flora and fauna, to visually confirm the application's therapeutic effectiveness
